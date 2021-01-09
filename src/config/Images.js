@@ -5,5 +5,6 @@
  * @version 1.0.0
  */
 export const Images = {
-  background: require('@assets/images/background.jpg'),
+  background: require("@assets/images/background.jpg"),
+  loser: require("@assets/images/loser.png"),
 };
