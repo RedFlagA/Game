@@ -1,15 +1,28 @@
-import React, { Component } from "react";
-import { View, Text, TouchableOpacity, ImageBackground } from "react-native";
+import React, { Component, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ImageBackground,
+  Animated,
+} from "react-native";
 import { styles } from "./style";
 import Toast from "react-native-simple-toast";
-import { Background } from "@components/index";
 import { Images } from "@config/index";
+import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 
 export default class Home extends Component {
   state = {
     number1: Math.floor(Math.random() * 16) + 5,
     number2: Math.floor(Math.random() * 16) + 5,
     score: 0,
+    second: 20,
+  };
+  timerProps = {
+    isPlaying: true,
+    duration: this.state.second,
+    size: 50,
+    strokeWidth: 4,
   };
   renderText() {
     const rendered = (
@@ -36,25 +49,54 @@ export default class Home extends Component {
       number2: Math.floor(Math.random() * 16) + 5,
     });
   }
+
   componentDidUpdate() {
     if (this.state.score < 0) {
       Toast.show("Thua cuộc");
+      this.props.navigation.navigate("Loser", {
+        score: this.state.score,
+        stt: false,
+      });
       this.setState({ score: 0 });
-      this.props.navigation.navigate("Loser");
     }
   }
 
+  children = ({ remainingTime }) => {
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    if (remainingTime === 0) {
+      this.props.navigation.navigate("Loser", {
+        score: this.state.score,
+      });
+    }
+    return (
+      <Text>
+        {minutes}:{seconds}
+      </Text>
+    );
+  };
+
   render() {
     let { name } = this.props.route.params;
+    let { second, score } = this.state;
+    console.log("dfs", score);
     return (
       <View style={styles.container}>
         <ImageBackground source={Images.background} style={styles.image}>
           <View style={styles.content}>
             <View style={styles.flexD}>
-              <Text>Điểm: {this.state.score}</Text>
+              <Text>Điểm: {score}</Text>
+              <CountdownCircleTimer
+                {...this.timerProps}
+                colors={[["#004777", 0.33], ["#F7B801", 0.33], ["#A30000"]]}
+                onComplete={() => {
+                  return [true, 1000]; // repeat animation in 1.5 seconds
+                }}
+              >
+                {this.children}
+              </CountdownCircleTimer>
               <Text>Tên: {name !== null && name}</Text>
             </View>
-
             <Text style={styles.textNumber}>{this.renderText()}</Text>
           </View>
           <View style={styles.bottom}>

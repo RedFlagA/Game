@@ -31,4 +31,8 @@ export const styles = StyleSheet.create({
   textBtn: {
     fontSize: 15,
   },
+  textScore: {
+    fontSize: 16,
+    paddingVertical: 30,
+  },
 });

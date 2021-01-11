@@ -39,4 +39,27 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  progess: {
+    width: "100%",
+    height: 40,
+    padding: 3,
+    borderColor: "#FAA",
+    borderWidth: 3,
+    borderRadius: 30,
+    marginTop: 200,
+    justifyContent: "center",
+  },
+  inner: {
+    width: "100%",
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "green",
+  },
+  label: {
+    fontSize: 23,
+    color: "black",
+    position: "absolute",
+    zIndex: 1,
+    alignSelf: "center",
+  },
 });
