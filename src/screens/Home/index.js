@@ -15,11 +15,31 @@ export default class Home extends Component {
   state = {
     number1: Math.floor(Math.random() * 16) + 5,
     number2: Math.floor(Math.random() * 16) + 5,
+    numberTotal: Math.floor(Math.random() * 100) + 1,
     score: 0,
     second: 120,
     sign: null,
-    level: 1,
+    level: 3,
+    currentQuestion: 0,
   };
+  data = [
+    {
+      question: "Nguyenn anh dep trai",
+      answer: true,
+    },
+    {
+      question: "sfvshvfshajvf",
+      answer: false,
+    },
+    {
+      question: "how do like that",
+      answer: false,
+    },
+    {
+      question: "chan cha buon noi",
+      answer: true,
+    },
+  ];
   timerProps = {
     isPlaying: true,
     duration: this.state.second,
@@ -27,7 +47,14 @@ export default class Home extends Component {
     strokeWidth: 4,
   };
   renderText() {
-    let { number1, number2, sign, level } = this.state;
+    let {
+      number1,
+      number2,
+      sign,
+      level,
+      numberTotal,
+      currentQuestion,
+    } = this.state;
     return (
       <View>
         {level == 1 && (
@@ -35,12 +62,51 @@ export default class Home extends Component {
             {number1} {sign} {number2}
           </Text>
         )}
-        {level == 2 && <Text style={styles.textNumber}>asvcdgvg</Text>}
+        {level == 2 && (
+          <Text style={styles.textNumber}>
+            {number1} {sign} {number2} {"="} {numberTotal}
+          </Text>
+        )}
+        {level == 3 && (
+          <Text style={styles.textNumber}>
+            {this.data[currentQuestion].question}
+          </Text>
+        )}
       </View>
     );
   }
+
   async check(isStatus) {
-    let { number1, number2, score, sign, level } = this.state;
+    let { score, level, currentQuestion } = this.state;
+    let total = this.checkCase();
+
+    if (total == isStatus) {
+      Toast.show("Bạn đã trả lời đúng!");
+      await this.setState({ score: score + 1 });
+    } else {
+      Toast.show("Sai rồi");
+      await this.setState({ score: score - 1 });
+    }
+
+    if (level === 3) {
+      const nextQuestion = currentQuestion + 1;
+      if (nextQuestion < this.data.length) {
+        this.setState({ currentQuestion: nextQuestion });
+      }
+    }
+
+    this.setState({
+      number1: Math.floor(Math.random() * 16) + 5,
+      number2: Math.floor(Math.random() * 16) + 5,
+      numberTotal: Math.floor(Math.random() * 100) + 1,
+      sign: this.randomSign(1),
+    });
+
+    this.checkLevel();
+  }
+
+  checkCase() {
+    let { number1, number2, sign, level, numberTotal } = this.state;
     let total;
     if (level == 1) {
       switch (sign) {
@@ -57,45 +123,48 @@ export default class Home extends Component {
           total = "nguyuen anh dep trai";
       }
     } else if (level == 2) {
-      total = true;
+      switch (sign) {
+        case "+":
+          total = number1 + number2 == numberTotal;
+          break;
+        case "-":
+          total = number1 - number2 == numberTotal;
+          break;
+        case "x":
+          total = number1 * number2 == numberTotal;
+          break;
+        case "x":
+          total = number1 / number2 == numberTotal;
+          break;
+        default:
+          total = "nguyuen anh dep trai";
+      }
+    } else if (level == 3) {
+      for (var i = 0; i <= this.data.length; i++) {
+        total = this.data[this.state.currentQuestion].answer;
+      }
     }
-
-    if (total == isStatus) {
-      Toast.show("Bạn đã trả lời đúng!");
-      await this.setState({ score: score + 1 });
-    } else {
-      Toast.show("Sai rồi");
-      await this.setState({ score: score - 1 });
-    }
-
-    this.setState({
-      number1: Math.floor(Math.random() * 16) + 5,
-      number2: Math.floor(Math.random() * 16) + 5,
-      sign: this.makeid(1),
-    });
-
-    this.checkLevel();
+    return total;
   }
 
   checkLevel() {
     let { score, level } = this.state;
-    console.log("score", score);
     if (score < 0) {
       Toast.show("Thua cuộc");
       this.props.navigation.navigate("Loser", {
         score: score,
         stt: false,
       });
-      this.setState({ score: 0 });
+      this.setState({ score: 0, currentQuestion: 0 });
     } else if (score > 2) {
       Toast.show("Qua level" + level + "rồi, chơi tiếp thôi");
       this.setState({ level: level + 1 });
     }
   }
 
-  makeid(length) {
+  randomSign(length) {
     var result = "";
-    var characters = "><=";
+    var characters = this.state.level == 1 ? "><=" : "+-x:";
     var charactersLength = characters.length;
     for (var i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -104,8 +173,8 @@ export default class Home extends Component {
   }
 
   componentDidMount() {
-    this.makeid(1);
-    this.setState({ sign: this.makeid(1) });
+    this.randomSign(1);
+    this.setState({ sign: this.randomSign(1) });
   }
 
   children = ({ remainingTime }) => {
